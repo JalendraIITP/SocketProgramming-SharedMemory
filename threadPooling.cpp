@@ -9,9 +9,15 @@
 #include<future>
 using namespace std;
 // A thread pool is a group of pre-instantiated, idle threads which stand ready to be given work.
-void func(){
+int func(int a){
+    this_thread::sleep_for(4s);
+    // cout<<"Thread Execution Completed"<<endl;
+    return a*a;
+}
+int func1(int a){
     this_thread::sleep_for(3s);
-    cout<<"Thread Execution Completed"<<endl;
+    // cout<<"Thread Execution Completed"<<endl;
+    return a*a*a;
 }
 class threadPool{
     int nthread;
@@ -54,10 +60,10 @@ class threadPool{
         auto task = make_shared<packaged_task<returnType()>>(bind(forward<F>(f),forward<Args>(args)...));
         future<returnType>res = task->get_future();
         unique_lock<mutex>lock(mtx);
-        tasks.push([task]()-> returnType{
+        tasks.push([task]()->void{
             (*task)();
         });
-        cv.notify_one();
+        cv.notify_all();
         return res;
     }
     virtual ~threadPool(){
@@ -72,9 +78,14 @@ class threadPool{
     }
 };
 int main(){
-    threadPool p(20);
+    threadPool p(2);
+    vector<future<int>>v;
     for(int i=0;i<60;i++){
-        auto f = p.execute(func);
+        v.push_back(p.execute(func,2));
+        v.push_back(p.execute(func1,2));
+    }
+    for(int i=0;i<v.size();i+=1){
+        cout<<v[i].get()<<endl;
     }
     return 0;
 }
