@@ -61,7 +61,7 @@ int main() {
             message += " -> ";
             message += str;
             for(auto sock:clients){
-                if(sock != new_socket)send(sock, message.c_str(), message.size(), 0);
+              if(sock != new_socket)send(sock, message.c_str(), message.size(), 0);
             }
         }
         close(new_socket);
